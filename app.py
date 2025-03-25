@@ -13,7 +13,8 @@ import base64
 from openai import OpenAI
 
 # Initialize the OpenAI client without the proxies parameter
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+api_key=st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=api_key)
 if not client.api_key:
     raise ValueError("OPENAI_API_KEY is not set in .streamlit/secrets.toml file.")
 
