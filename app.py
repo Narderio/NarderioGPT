@@ -10,8 +10,11 @@ import tempfile
 import base64
 
 # Set OpenAI API key from Streamlit secrets
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-if not openai.api_key:
+from openai import OpenAI
+
+# Initialize the OpenAI client without the proxies parameter
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+if not client.api_key:
     raise ValueError("OPENAI_API_KEY is not set in .streamlit/secrets.toml file.")
 
 # Initialize session state variables if they don't exist
@@ -378,7 +381,7 @@ if prompt := st.chat_input("Send a message..."):
             messages_for_api.append({"role": "user", "content": message_content})
         
         # Use streaming for all responses
-        for response in openai.chat.completions.create(
+        for response in client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages_for_api,
             max_tokens=4096,
