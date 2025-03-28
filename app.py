@@ -71,7 +71,7 @@ st.markdown("""
 
 /* Style for code blocks in chat messages */
 .stChatMessage pre {
-    background-color: #f6f8fa !important;
+    background-color: #e0e0e0 !important;  /* Changed to gray */
     border-radius: 6px;
     padding: 16px;
     overflow: auto;
@@ -79,7 +79,7 @@ st.markdown("""
 }
 
 .stChatMessage code {
-    background-color: #f6f8fa !important;
+    background-color: #e0e0e0 !important;  /* Changed to gray */
     color: #24292e !important;
     padding: 0.2em 0.4em;
     border-radius: 3px;
