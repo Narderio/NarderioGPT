@@ -8,9 +8,10 @@ import PyPDF2
 import pandas as pd
 import tempfile
 import base64
-
-# Set OpenAI API key from Streamlit secrets
 from openai import OpenAI
+from streamlit_paste_button import paste_image_button as pbutton
+
+
 
 # Initialize the OpenAI client without the proxies parameter
 api_key=st.secrets["OPENAI_API_KEY"]
@@ -165,6 +166,8 @@ with st.sidebar:
         "Choose an image", 
         type=["jpg", "jpeg", "png"]
     )
+
+    paste_result = pbutton("📋 Paste an image")
     
     # Clear chat button
     if st.button("Clear Chat"):
@@ -334,6 +337,34 @@ if prompt := st.chat_input("Send a message..."):
                 "image_url": {"url": f"data:image/png;base64,{image_base64}"},
             }
         )
+
+    elif paste_result.image_data is not None:
+        # Converte in un oggetto PIL.Image se necessario
+        if isinstance(paste_result.image_data, Image.Image):
+            image = paste_result.image_data
+        else:
+            image = Image.open(io.BytesIO(paste_result.image_data))
+
+        # Display dell'immagine incollata
+        user_message = {"role": "user", "content": prompt, "image_data": image}
+        st.session_state.messages.append(user_message)
+
+        with st.chat_message("user"):
+            st.image(image, caption="Pasted Image")
+            st.markdown(prompt)
+
+        # Preparazione per API
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        image_bytes = buffered.getvalue()
+        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+
+        # Creazione contenuto per API OpenAI
+        message_content = [
+            {"type": "text", "text": prompt},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_base64}"}}
+        ]
+
     else:
         # Text-only message
         user_message = {"role": "user", "content": prompt}
@@ -365,7 +396,7 @@ if prompt := st.chat_input("Send a message..."):
         full_response = ""
         
         # Prepare messages based on content type
-        if image_data is not None:
+        if image_data is not None or paste_result.image_data is not None:
             # For images with vision model
             messages_for_api = [
                 {"role": m["role"], "content": m["content"]} 
